@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../utils/signup.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class AuthScreen extends StatefulWidget {
    
@@ -15,6 +16,8 @@ class _AuthScreenState extends State<AuthScreen> {
   TextEditingController username0 = TextEditingController();
   TextEditingController password0 = TextEditingController();
   TextEditingController email0 = TextEditingController();
+  TextEditingController bio0 = TextEditingController();
+  TextEditingController avatarUrl0 = TextEditingController();
   
   
 
@@ -32,8 +35,31 @@ class _AuthScreenState extends State<AuthScreen> {
       setState(() {
         _selectedImage = File(pickedFile.path);
       });
+
+      //await _uploadAndSetAvatarUrl(_selectedImage!);
     }
   }
+
+
+  Future<void> _uploadAndSetAvatarUrl(File imageFile) async {
+    try {
+      String fileName = "avatars/${DateTime.now().millisecondsSinceEpoch}.png";
+      Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
+
+      UploadTask uploadTask = storageRef.putFile(imageFile);
+      TaskSnapshot snapshot = await uploadTask;
+
+      // Get the download URL
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+
+      // Set the URL in the controller
+      avatarUrl0.text = downloadUrl;
+    } catch (e) {
+      print("Error uploading image: $e");
+      throw Exception("Failed to upload image");
+    }
+  }
+
 
 
   @override
@@ -74,14 +100,10 @@ class _AuthScreenState extends State<AuthScreen> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () async {
-                        String email = email0.text;
-                        String password = password0.text;
-                        String username = username0.text;
                         // Navigator.push(
                         //   context,
                         //   MaterialPageRoute(builder: (context) => signup(email,password,username)), // Assurez-vous que LoginScreen() est défini dans login.dart
                         // );
-                        User? user = await authService.signup(email, password, username);
                       },
                       style: ElevatedButton.styleFrom(
                         minimumSize: Size(100, 50),
@@ -124,31 +146,51 @@ class _AuthScreenState extends State<AuthScreen> {
                                         labelText: 'Mot de passe',
                                       ),
                                     ),
-
-                                    SizedBox(height: 20),
-                                    // Avatar preview
-                                    GestureDetector(
-                                      onTap: _pickImage,
-                                      child: CircleAvatar(
-                                        radius: 40,
-                                        backgroundColor: Colors.blue.shade100,
-                                        backgroundImage: _selectedImage != null
-                                            ? FileImage(_selectedImage!)
-                                            : null,
-                                        child: _selectedImage == null
-                                            ? Icon(
-                                                Icons.add_a_photo,
-                                                size: 30,
-                                                color: Colors.blue,
-                                              )
-                                            : null,
+                                    TextField(
+                                      controller: bio0,
+                                      obscureText: true,
+                                      decoration: InputDecoration(
+                                        labelText: 'Ajouter une bio',
                                       ),
                                     ),
-                                    SizedBox(height: 10),
-                                    Text(
-                                      "Appuyez pour sélectionner une image",
-                                      style: TextStyle(fontSize: 12),
+
+                                    SizedBox(height: 20),
+                                  GestureDetector(
+                                    onTap: _pickImage,
+                                    child: CircleAvatar(
+                                      radius: 40,
+                                      backgroundColor: Colors.blue.shade100,
+                                      backgroundImage: _selectedImage != null
+                                          ? FileImage(_selectedImage!)
+                                          : null,
+                                      child: _selectedImage == null
+                                          ? Icon(
+                                              Icons.add_a_photo,
+                                              size: 30,
+                                              color: Colors.blue,
+                                            )
+                                          : null,
                                     ),
+                                  ),
+                                  SizedBox(height: 10),
+                                  Text(
+                                    "Appuyez pour sélectionner une image",
+                                    style: TextStyle(fontSize: 12),
+                                  ),
+                                  SizedBox(height: 10),
+                                  // Avatar URL Field (read-only)
+                                  TextField(
+                                    controller: avatarUrl0,
+                                    readOnly: true,
+                                    decoration: InputDecoration(
+                                      labelText: "URL de l'avatar",
+                                      prefixIcon:
+                                          Icon(Icons.link, color: Colors.blue),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                  ),
                                     // Vous pouvez ajouter d'autres champs
                                   ],
                                 ),
@@ -161,8 +203,13 @@ class _AuthScreenState extends State<AuthScreen> {
                                   child: Text('Annuler'),
                                 ),
                                 TextButton(
-                                  onPressed: () {
-                                    // Logique d'inscription
+                                  onPressed: ()  async {
+                                    String email = email0.text;
+                                    String password = password0.text;
+                                    String username = username0.text;
+                                    String bio = bio0.text;
+                                    String avatarUrl = avatarUrl0.text;
+                                    User? user = await authService.signup(email, password, username, bio, avatarUrl);
                                   },
                                   child: Text('S\'inscrire'),
                                 ),
