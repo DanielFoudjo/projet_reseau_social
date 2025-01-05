@@ -1,0 +1,176 @@
+import 'package:flutter/material.dart';
+
+class FeedScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[200],
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          "Home",
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.notifications, color: Colors.black),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: Icon(Icons.message, color: Colors.black),
+            onPressed: () {},
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          // Top Avatars Section
+          Container(
+            height: 100,
+            color: Colors.white,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              itemCount: 10, // Replace with dynamic count
+              separatorBuilder: (context, index) => SizedBox(width: 10),
+              itemBuilder: (context, index) {
+                return Column(
+                  children: [
+                    CircleAvatar(
+                      radius: 30,
+                      backgroundImage: NetworkImage(
+                        "https://via.placeholder.com/150", // Replace with dynamic URL
+                      ),
+                    ),
+                    SizedBox(height: 5),
+                    Text(
+                      "User $index", // Replace with dynamic username
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+          SizedBox(height: 10),
+          // Posts Feed
+          Expanded(
+            child: ListView.builder(
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              itemCount: 10, // Replace with dynamic post count
+              itemBuilder: (context, index) {
+                return Card(
+                  margin: EdgeInsets.only(bottom: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // User Info Row
+                      ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: NetworkImage(
+                            "https://via.placeholder.com/150", // Replace with dynamic URL
+                          ),
+                        ),
+                        title: Text(
+                          "User $index", // Replace with dynamic username
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text("2 hours ago"), // Replace with dynamic timestamp
+                        trailing: Icon(Icons.more_vert),
+                      ),
+                      // Post Image
+                      Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          image: DecorationImage(
+                            image: NetworkImage(
+                              "https://via.placeholder.com/500", // Replace with dynamic image URL
+                            ),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      // Post Actions
+                      Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.favorite_border),
+                                  onPressed: () {},
+                                ),
+                                SizedBox(width: 5),
+                                Text("123"), // Replace with dynamic like count
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.comment),
+                                  onPressed: () {},
+                                ),
+                                SizedBox(width: 5),
+                                Text("45"), // Replace with dynamic comment count
+                              ],
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.share),
+                              onPressed: () {},
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 0,
+        selectedItemColor: Colors.red, // Icon color when selected
+        unselectedItemColor: Colors.black, // Icon color when unselected
+        onTap: (index) {
+          // Handle navigation
+        },
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: "Home",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: "Search",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add_circle),
+            label: "Post",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications),
+            label: "Notifications",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: "Profile",
+          ),
+        ],
+      ),
+    );
+  }
+}
