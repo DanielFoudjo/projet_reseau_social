@@ -39,7 +39,7 @@ class SocialNetworkApp extends StatelessWidget {
         ),
       ),
       // Écran par défaut (page d'accueil après login)
-      home: FeedScreen(),
+      home: AuthScreen(),
       routes: {
         '/home': (context) => FeedScreen(),
         '/search': (context) => SearchScreen(),

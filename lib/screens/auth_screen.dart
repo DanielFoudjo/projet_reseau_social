@@ -1,8 +1,16 @@
+import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../utils/signup.dart';
 
-class AuthScreen extends StatelessWidget {
+class AuthScreen extends StatefulWidget {
+   
+  @override
+  _AuthScreenState createState() => _AuthScreenState();
+}
+
+class _AuthScreenState extends State<AuthScreen> {
 
   TextEditingController username0 = TextEditingController();
   TextEditingController password0 = TextEditingController();
@@ -11,6 +19,21 @@ class AuthScreen extends StatelessWidget {
   
 
   final AuthService authService = AuthService();
+
+  final ImagePicker _picker = ImagePicker(); // Image picker instance
+
+  File? _selectedImage; // To store the selected image file
+
+  // Function to pick an image from the gallery
+  Future<void> _pickImage() async {
+    final XFile? pickedFile =
+        await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
+  }
 
 
   @override
@@ -100,6 +123,31 @@ class AuthScreen extends StatelessWidget {
                                       decoration: InputDecoration(
                                         labelText: 'Mot de passe',
                                       ),
+                                    ),
+
+                                    SizedBox(height: 20),
+                                    // Avatar preview
+                                    GestureDetector(
+                                      onTap: _pickImage,
+                                      child: CircleAvatar(
+                                        radius: 40,
+                                        backgroundColor: Colors.blue.shade100,
+                                        backgroundImage: _selectedImage != null
+                                            ? FileImage(_selectedImage!)
+                                            : null,
+                                        child: _selectedImage == null
+                                            ? Icon(
+                                                Icons.add_a_photo,
+                                                size: 30,
+                                                color: Colors.blue,
+                                              )
+                                            : null,
+                                      ),
+                                    ),
+                                    SizedBox(height: 10),
+                                    Text(
+                                      "Appuyez pour sélectionner une image",
+                                      style: TextStyle(fontSize: 12),
                                     ),
                                     // Vous pouvez ajouter d'autres champs
                                   ],
