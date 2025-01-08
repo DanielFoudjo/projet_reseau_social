@@ -1,7 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:projet_reseau_social/models/user_model.dart';
 import '../utils/navigation.dart';
+import '../utils/user.dart';
 
-class FeedScreen extends StatelessWidget {
+class FeedScreen extends StatefulWidget {
+  @override
+  _FeedScreenState createState() => _FeedScreenState();
+}
+
+class _FeedScreenState extends State<FeedScreen> {
+
+  String userName = "Home"; // Variable pour stocker le nom de l'utilisateur
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName(); // Charger les données utilisateur au démarrage
+  }
+
+  Future<void> _loadUserName() async { 
+    UserModel? userData = await GetUserDataFromFirestore.getUserData(); // Appel de la méthode dans user_service.dart
+      if (userData != null){
+      setState(() {
+        userName = userData.name;
+      });
+    }
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -11,7 +38,8 @@ class FeedScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          "Home",
+          // "Home",
+          userName,
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
