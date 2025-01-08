@@ -2,8 +2,9 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../utils/signup.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'feed_screen.dart';
+import '../services/auth_service.dart';
 
 class AuthScreen extends StatefulWidget {
    
@@ -18,6 +19,9 @@ class _AuthScreenState extends State<AuthScreen> {
   TextEditingController email0 = TextEditingController();
   TextEditingController bio0 = TextEditingController();
   TextEditingController avatarUrl0 = TextEditingController();
+
+  TextEditingController email1 = TextEditingController();
+  TextEditingController password1 = TextEditingController();
   
   
 
@@ -100,10 +104,21 @@ class _AuthScreenState extends State<AuthScreen> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () async {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(builder: (context) => signup(email,password,username)), // Assurez-vous que LoginScreen() est défini dans login.dart
-                        // );
+                        String email10 = email1.text;
+                        String password10 = password1.text;
+                        User? user = await authService.login(email10, password10);
+                        if (user != null) {
+                          // Si l'inscription réussit, naviguer vers FeedScreen
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => FeedScreen()),
+                          );
+                        } else {
+                          // Optionnel : afficher une erreur si l'inscription échoue
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Connexion échouée. Veuillez réessayer.")),
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         minimumSize: Size(100, 50),
@@ -210,6 +225,19 @@ class _AuthScreenState extends State<AuthScreen> {
                                     String bio = bio0.text;
                                     String avatarUrl = avatarUrl0.text;
                                     User? user = await authService.signup(email, password, username, bio, avatarUrl);
+
+                                    if (user != null) {
+                                      // Si l'inscription réussit, naviguer vers FeedScreen
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => FeedScreen()),
+                                      );
+                                    } else {
+                                      // Optionnel : afficher une erreur si l'inscription échoue
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text("Inscription échouée. Veuillez réessayer.")),
+                                      );
+                                    }
                                   },
                                   child: Text('S\'inscrire'),
                                 ),
@@ -235,6 +263,7 @@ class _AuthScreenState extends State<AuthScreen> {
               SizedBox(height: 20),
               // Email field
               TextField(
+                controller: email1,
                 decoration: InputDecoration(
                   labelText: "Email",
                   prefixIcon: Icon(Icons.email, color: Colors.blue),
@@ -246,6 +275,7 @@ class _AuthScreenState extends State<AuthScreen> {
               SizedBox(height: 20),
               // Password field
               TextField(
+                controller: password1,
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: "Password",
