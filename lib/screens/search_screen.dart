@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/navigation.dart';
 
 class SearchScreen extends StatelessWidget {
   @override
@@ -37,6 +38,7 @@ class SearchScreen extends StatelessWidget {
           ),
         ],
       ),
+      bottomNavigationBar: Navigation(),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/navigation.dart';
 
 class NotificationsScreen extends StatelessWidget {
   @override
@@ -17,6 +18,7 @@ class NotificationsScreen extends StatelessWidget {
           );
         },
       ),
+      bottomNavigationBar: Navigation(),
     );
   }
 }

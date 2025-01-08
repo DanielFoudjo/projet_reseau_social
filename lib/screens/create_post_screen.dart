@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/navigation.dart';
 
 class CreatePostScreen extends StatelessWidget {
   @override
@@ -28,6 +29,7 @@ class CreatePostScreen extends StatelessWidget {
           ],
         ),
       ),
+      bottomNavigationBar: Navigation(),
     );
   }
 }
