@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:projet_reseau_social/models/user_model.dart';
 import '../utils/navigation.dart';
 import '../utils/user.dart';
+import 'chat_screen.dart';
 
 class FeedScreen extends StatefulWidget {
   @override
@@ -53,7 +54,12 @@ class _FeedScreenState extends State<FeedScreen> {
           ),
           IconButton(
             icon: Icon(Icons.message, color: Colors.black),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => ChatScreen()),
+              );
+            },
           ),
         ],
       ),

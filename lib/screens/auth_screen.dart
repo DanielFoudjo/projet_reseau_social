@@ -34,20 +34,20 @@ class _AuthScreenState extends State<AuthScreen> {
   // Function to pick an image from the gallery
   Future<void> _pickImage() async {
     final XFile? pickedFile =
-        await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
+      await _picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
       setState(() {
         _selectedImage = File(pickedFile.path);
       });
 
-      //await _uploadAndSetAvatarUrl(_selectedImage!);
+      await _uploadAndSetAvatarUrl(_selectedImage!);
     }
   }
 
 
   Future<void> _uploadAndSetAvatarUrl(File imageFile) async {
     try {
-      String fileName = "avatars/${DateTime.now().millisecondsSinceEpoch}.png";
+      String fileName = "../avatars/${DateTime.now().millisecondsSinceEpoch}.png";
       Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
 
       UploadTask uploadTask = storageRef.putFile(imageFile);

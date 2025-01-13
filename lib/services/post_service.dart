@@ -15,6 +15,8 @@ class PostService {
       'content': content,
       'imageUrl': imageUrl,
       'createdAt': FieldValue.serverTimestamp(),
+      'likeCount': 0,
+      'commentCount': 0,
     });
   }
 }
