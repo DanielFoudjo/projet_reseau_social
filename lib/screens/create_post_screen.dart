@@ -37,7 +37,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
   Future<void> _uploadAndSetAvatarUrl(File imageFile) async {
     try {
-      String fileName = "../posts/${DateTime.now().millisecondsSinceEpoch}.png";
+      String fileName = "/posts/${DateTime.now().millisecondsSinceEpoch}.png";
       Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
 
       UploadTask uploadTask = storageRef.putFile(imageFile);
@@ -115,9 +115,11 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CircleAvatar(
-                  radius: 24,
-                  backgroundImage: AssetImage(''),
-                ),
+                radius: 24,
+                backgroundImage: profile != null
+                    ? NetworkImage(profile!) // Charge l'image depuis l'URL si disponible
+                    : AssetImage('assets/default_avatar.png') as ImageProvider, // Image par défaut si aucune URL n'est disponible
+              ),
                 SizedBox(width: 10),
                 Expanded(
                   child: TextField(

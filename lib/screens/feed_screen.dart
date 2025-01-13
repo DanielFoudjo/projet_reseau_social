@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:projet_reseau_social/models/post_model.dart';
 import 'package:projet_reseau_social/models/user_model.dart';
+import '../services/post_service.dart';
 import '../utils/navigation.dart';
 import '../utils/user.dart';
 import 'chat_screen.dart';
@@ -11,7 +13,10 @@ class FeedScreen extends StatefulWidget {
 
 class _FeedScreenState extends State<FeedScreen> {
 
+  List<Post> posts = []; // Liste des posts
   String userName = "Home"; // Variable pour stocker le nom de l'utilisateur
+  String userId = '';
+  String? userAvatarUrl;
 
   @override
   void initState() {
@@ -19,12 +24,30 @@ class _FeedScreenState extends State<FeedScreen> {
     _loadUserName(); // Charger les données utilisateur au démarrage
   }
 
+  // Méthode pour charger les posts à partir de Firestore
+
+  
+
   Future<void> _loadUserName() async { 
     UserModel? userData = await GetUserDataFromFirestore.getUserData(); // Appel de la méthode dans user_service.dart
       if (userData != null){
       setState(() {
         userName = userData.name;
+        userId = userData.id; // Récupérer l'ID de l'utilisateur
+        userAvatarUrl = userData.avatarUrl; // Récupérer l'URL de l'avatar de l'utilisateur
       });
+    }
+    await _fetchPosts();
+  }
+
+  Future<void> _fetchPosts() async {
+    try {
+      List<Post> fetchedPosts = await PostService().fetchPosts(userId);
+      setState(() {
+        posts = fetchedPosts;
+      });
+    } catch (e) {
+      print("Erreur lors du chargement des posts : $e");
     }
   }
 
@@ -98,8 +121,9 @@ class _FeedScreenState extends State<FeedScreen> {
           Expanded(
             child: ListView.builder(
               padding: EdgeInsets.symmetric(horizontal: 10),
-              itemCount: 10, // Replace with dynamic post count
+              itemCount: posts.length, // Replace with dynamic post count
               itemBuilder: (context, index) {
+                final post = posts[index];
                 return Card(
                   margin: EdgeInsets.only(bottom: 15),
                   shape: RoundedRectangleBorder(
@@ -112,14 +136,14 @@ class _FeedScreenState extends State<FeedScreen> {
                       ListTile(
                         leading: CircleAvatar(
                           backgroundImage: NetworkImage(
-                            "https://via.placeholder.com/150", // Replace with dynamic URL
+                            userAvatarUrl ?? "", // Replace with dynamic URL
                           ),
                         ),
                         title: Text(
-                          "User $index", // Replace with dynamic username
+                          userName, // Replace with dynamic username
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        subtitle: Text("2 hours ago"), // Replace with dynamic timestamp
+                        subtitle: Text(post.createdAt.timeZoneOffset.toString() + "ago"), // Replace with dynamic timestamp
                         trailing: Icon(Icons.more_vert),
                       ),
                       // Post Image
@@ -129,7 +153,7 @@ class _FeedScreenState extends State<FeedScreen> {
                           borderRadius: BorderRadius.circular(15),
                           image: DecorationImage(
                             image: NetworkImage(
-                              "https://via.placeholder.com/500", // Replace with dynamic image URL
+                              post.imageUrl ?? '', // Replace with dynamic image URL
                             ),
                             fit: BoxFit.cover,
                           ),
@@ -148,7 +172,7 @@ class _FeedScreenState extends State<FeedScreen> {
                                   onPressed: () {},
                                 ),
                                 SizedBox(width: 5),
-                                Text("123"), // Replace with dynamic like count
+                                Text(post.likeCount.toString()), // Replace with dynamic like count
                               ],
                             ),
                             Row(
@@ -158,7 +182,7 @@ class _FeedScreenState extends State<FeedScreen> {
                                   onPressed: () {},
                                 ),
                                 SizedBox(width: 5),
-                                Text("45"), // Replace with dynamic comment count
+                                Text(post.commentsCount.toString()), // Replace with dynamic comment count
                               ],
                             ),
                             IconButton(

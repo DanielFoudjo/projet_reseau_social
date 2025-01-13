@@ -21,7 +21,7 @@ class Post {
   factory Post.fromMap(Map<String, dynamic> data, String id) {
     return Post(
       userId: data['userId'] ?? '',
-      content: data['username'] ?? '', // Assure-toi que 'username' existe dans la base de données
+      content: data['content'] ?? '', // Assure-toi que 'username' existe dans la base de données
       // userAvatarUrl: data['userAvatarUrl'] ?? '', // Assure-toi que 'userAvatarUrl' existe aussi
       // content: data['content'] ?? '',
       imageUrl: data['imageUrl'] ?? '',

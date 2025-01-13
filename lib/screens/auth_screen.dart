@@ -47,7 +47,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Future<void> _uploadAndSetAvatarUrl(File imageFile) async {
     try {
-      String fileName = "../avatars/${DateTime.now().millisecondsSinceEpoch}.png";
+      String fileName = "/avatars/${DateTime.now().millisecondsSinceEpoch}.png";
       Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
 
       UploadTask uploadTask = storageRef.putFile(imageFile);
