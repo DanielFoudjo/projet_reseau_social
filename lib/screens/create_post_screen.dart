@@ -14,8 +14,9 @@ class CreatePostScreen extends StatefulWidget {
 
 class _CreatePostScreenState extends State<CreatePostScreen> {
   final ImagePicker _picker = ImagePicker(); // Image picker instance
-  String? profile;
+  String profile = '';
   String idUser = '';
+  String ownerUsername = '';
 
   File? _selectedImage; // To store the selected image file
   TextEditingController postContent = TextEditingController();
@@ -65,8 +66,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     UserModel? userData = await GetUserDataFromFirestore.getUserData(); // Appel de la méthode dans user_service.dart
       if (userData != null){
       setState(() {
-        profile = userData.avatarUrl;
+        profile = userData.avatarUrl ?? '';
         idUser = userData.id;
+        ownerUsername = userData.name;
         print(profile);
       });
     }
@@ -238,7 +240,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 }else{
                   // Envoi du post à Firebase
                   // Send the post to Firebase
-                  PostService().createPost(idUser, postContent1, imageUrl1);
+                  PostService().createPost(idUser, ownerUsername, profile, postContent1, imageUrl1);
                   postContent.clear();
                   imageUrl.clear();
                   removeMedia();

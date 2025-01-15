@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Post {
   String userId;
+  String ownerUsername;
+  String ownerAvatar;
   String? content;
   String? imageUrl;
   DateTime createdAt;
@@ -11,6 +13,8 @@ class Post {
 
   Post({
     required this.userId,
+    required this.ownerUsername,
+    required this.ownerAvatar,
     this.content,
     this.imageUrl,
     required this.createdAt, 
@@ -21,6 +25,8 @@ class Post {
   factory Post.fromMap(Map<String, dynamic> data, String id) {
     return Post(
       userId: data['userId'] ?? '',
+      ownerUsername: data['ownerUsername'] ?? '',
+      ownerAvatar: data['ownerAvatar'] ?? '',
       content: data['content'] ?? '', // Assure-toi que 'username' existe dans la base de données
       // userAvatarUrl: data['userAvatarUrl'] ?? '', // Assure-toi que 'userAvatarUrl' existe aussi
       // content: data['content'] ?? '',

@@ -1,6 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class ChatScreen extends StatelessWidget {
+import '../models/user_model.dart';
+import '../utils/user.dart';
+
+class ChatScreen extends StatefulWidget {
+  final String currentUser; // L'utilisateur actuel
+  final String chatWithUser; // L'utilisateur avec qui discuter
+  final String chatRoomId; // L'identifiant de la salle de chat
+
+  ChatScreen({
+    required this.currentUser,
+    required this.chatWithUser,
+    required this.chatRoomId,
+  });
+
+  @override
+  _ChatScreenState createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends State<ChatScreen> {
+  final TextEditingController _messageController = TextEditingController();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  String profile = '';
+
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName(); // Charger les données utilisateur au démarrage
+  }
+
+
+  Future<void> _loadUserName() async { 
+    UserModel? userData = await GetUserDataFromFirestore.getOneUser(widget.chatWithUser); // Appel de la méthode dans user_service.dart
+      if (userData != null){
+      setState(() {
+        profile = userData.avatarUrl ?? '';
+        
+      });
+    }
+  }
+
+
+
+  void sendMessage() {
+    String messageContent = _messageController.text.trim();
+    if (messageContent.isNotEmpty) {
+      _firestore.collection('messages').add({
+        'chatRoomId': widget.chatRoomId,
+        'from': widget.currentUser,
+        'to': widget.chatWithUser,
+        'contents': messageContent,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+      _messageController.clear();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -11,7 +68,7 @@ class ChatScreen extends StatelessWidget {
         title: Row(
           children: [
             CircleAvatar(
-              backgroundImage: AssetImage(''), // Remplacez par l'image souhaitée
+              backgroundImage: NetworkImage(profile), // Remplace par l'image de l'utilisateur
               radius: 20,
             ),
             SizedBox(width: 10),
@@ -19,7 +76,7 @@ class ChatScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Username",
+                  widget.chatWithUser, // Nom de l'utilisateur avec qui discuter
                   style: TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
@@ -27,7 +84,7 @@ class ChatScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  "Online",
+                  "Online", // Tu peux intégrer le statut en ligne ici
                   style: TextStyle(
                     color: Colors.grey,
                     fontSize: 12,
@@ -52,18 +109,38 @@ class ChatScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
+          // Liste des messages
           Expanded(
-            child: ListView(
-              padding: EdgeInsets.all(10),
-              children: [
-                buildMessageBubble("Hello! How are you?", true),
-                buildMessageBubble("I'm good, thanks! 😊", false),
-                buildMessageBubble("What about you?", false),
-                buildMessageBubble("I'm doing great, thank you! ❤️", true),
-                buildMessageBubble("Let's meet later?", true),
-              ],
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _firestore
+                  .collection('messages')
+                  .where('chatRoomId', isEqualTo: widget.chatRoomId)
+                  .orderBy('timestamp', descending: false)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(child: Text("Pas encore de messages."));
+                }
+
+                List<DocumentSnapshot> docs = snapshot.data!.docs;
+
+                return ListView.builder(
+                  padding: EdgeInsets.all(10),
+                  itemCount: docs.length,
+                  itemBuilder: (context, index) {
+                    final data = docs[index].data() as Map<String, dynamic>;
+                    bool isSentByMe = data['from'] == widget.currentUser;
+
+                    return buildMessageBubble(data['contents'], isSentByMe);
+                  },
+                );
+              },
             ),
           ),
+          // Barre d'entrée du message
           buildInputBar(),
         ],
       ),
@@ -116,19 +193,16 @@ class ChatScreen extends StatelessWidget {
           ),
           Expanded(
             child: TextField(
+              controller: _messageController,
               decoration: InputDecoration(
-                hintText: "Type a message",
+                hintText: "Tapez un message...",
                 border: InputBorder.none,
               ),
             ),
           ),
           IconButton(
-            icon: Icon(Icons.emoji_emotions_outlined, color: Colors.grey),
-            onPressed: () {},
-          ),
-          IconButton(
             icon: Icon(Icons.send, color: Colors.blue),
-            onPressed: () {},
+            onPressed: sendMessage,
           ),
         ],
       ),

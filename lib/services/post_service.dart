@@ -4,7 +4,7 @@ import '../models/post_model.dart';
 class PostService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<List<Post>> fetchPosts(String currentUserId) async {
+  Future<List<Post>> fetchPosts() async {
     QuerySnapshot snapshot = await _firestore.collection('posts').orderBy('createdAt', descending: true).get();
     // QuerySnapshot snapshot = await _firestore
     //   .collection('posts')
@@ -14,9 +14,11 @@ class PostService {
     return snapshot.docs.map((doc) => Post.fromMap(doc.data() as Map<String, dynamic>, doc.id)).toList();
   }
 
-  Future<void> createPost(String userId, String content, String imageUrl) async {
+  Future<void> createPost(String userId, String ownerUsername, String ownerAvatar, String content, String imageUrl) async {
     await _firestore.collection('posts').add({
       'userId': userId,
+      'ownerUsername' : ownerUsername,
+      'ownerAvatar' : ownerAvatar,
       'content': content,
       'imageUrl': imageUrl,
       'createdAt': FieldValue.serverTimestamp(),

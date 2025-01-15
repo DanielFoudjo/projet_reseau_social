@@ -5,6 +5,7 @@ import '../services/post_service.dart';
 import '../utils/navigation.dart';
 import '../utils/user.dart';
 import 'chat_screen.dart';
+import 'discussions_screen.dart';
 
 class FeedScreen extends StatefulWidget {
   @override
@@ -42,7 +43,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   Future<void> _fetchPosts() async {
     try {
-      List<Post> fetchedPosts = await PostService().fetchPosts(userId);
+      List<Post> fetchedPosts = await PostService().fetchPosts();
       setState(() {
         posts = fetchedPosts;
       });
@@ -80,7 +81,7 @@ class _FeedScreenState extends State<FeedScreen> {
             onPressed: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => ChatScreen()),
+                MaterialPageRoute(builder: (context) => HomeScreen(currentUser: userName,)),
               );
             },
           ),
@@ -136,11 +137,11 @@ class _FeedScreenState extends State<FeedScreen> {
                       ListTile(
                         leading: CircleAvatar(
                           backgroundImage: NetworkImage(
-                            userAvatarUrl ?? "", // Replace with dynamic URL
+                            post.ownerAvatar, // Replace with dynamic URL
                           ),
                         ),
                         title: Text(
-                          userName, // Replace with dynamic username
+                          post.ownerUsername, // Replace with dynamic username
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         subtitle: Text(post.createdAt.timeZoneOffset.toString() + "ago"), // Replace with dynamic timestamp
