@@ -4,6 +4,8 @@ import '../screens/profile_screen.dart';
 import '../screens/search_screen.dart';
 import '../screens/notifications_screen.dart';
 import '../screens/feed_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Navigation extends StatelessWidget{
   @override
@@ -35,9 +37,28 @@ class Navigation extends StatelessWidget{
           );
         }else if(index == 4) {
           Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => ProfileScreen()),
-          );
+  context,
+  MaterialPageRoute(
+    builder: (context) {
+      final String? userId = FirebaseAuth.instance.currentUser?.uid;
+
+      if (userId == null) {
+        // Si aucun utilisateur n'est connecté, affiche un message ou redirige
+        return Scaffold(
+          body: Center(
+            child: Text(
+              "Aucun utilisateur connecté. Veuillez vous connecter.",
+              style: TextStyle(fontSize: 16, color: Colors.red),
+            ),
+          ),
+        );
+      }
+
+      return ProfileScreen(userId: userId); // Passe l'ID utilisateur connecté
+    },
+  ),
+);
+
         }
       },
       items: [

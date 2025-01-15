@@ -23,6 +23,7 @@ class _FeedScreenState extends State<FeedScreen> {
   void initState() {
     super.initState();
     _loadUserName(); // Charger les données utilisateur au démarrage
+    _fetchPosts();
   }
 
   // Méthode pour charger les posts à partir de Firestore
@@ -51,6 +52,65 @@ class _FeedScreenState extends State<FeedScreen> {
       print("Erreur lors du chargement des posts : $e");
     }
   }
+
+  Future<void> _handleLike(Post post) async {
+    try {
+      bool isLiked = post.likedBy.contains(userId);
+      await PostService().likePost(post.id ?? '', userId, isLiked);
+      setState(() {
+        // Mettre à jour localement les données du post
+        if (isLiked) {
+          post.likedBy.remove(userId);
+          post.likeCount -= 1;
+        } else {
+          post.likedBy.add(userId);
+          post.likeCount += 1;
+        }
+      });
+    } catch (e) {
+      print("Erreur lors de l'ajout du like : $e");
+    }
+  }
+
+  void _showCommentDialog(String postId) {
+  TextEditingController commentController = TextEditingController();
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text("Ajouter un commentaire"),
+        content: TextField(
+          controller: commentController,
+          decoration: InputDecoration(hintText: "Écris ton commentaire..."),
+          maxLines: null, // Permet plusieurs lignes
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Fermer la boîte de dialogue
+            },
+            child: Text("Annuler"),
+          ),
+          TextButton(
+            onPressed: () async {
+              String content = commentController.text.trim();
+              if (content.isNotEmpty) {
+                // Appeler la méthode du service pour ajouter un commentaire
+                await PostService().addComment(postId, userId, userName, content);
+                Navigator.pop(context); // Fermer la boîte de dialogue après l'envoi
+                setState(() {
+                
+                }); // Recharger les posts pour afficher le nouveau commentaire
+              }
+            },
+            child: Text("Envoyer"),
+          ),
+        ],
+      );
+    },
+  );
+}
 
 
 
@@ -125,6 +185,7 @@ class _FeedScreenState extends State<FeedScreen> {
               itemCount: posts.length, // Replace with dynamic post count
               itemBuilder: (context, index) {
                 final post = posts[index];
+                bool isLiked = post.likedBy.contains(userId);
                 return Card(
                   margin: EdgeInsets.only(bottom: 15),
                   shape: RoundedRectangleBorder(
@@ -169,8 +230,13 @@ class _FeedScreenState extends State<FeedScreen> {
                             Row(
                               children: [
                                 IconButton(
-                                  icon: Icon(Icons.favorite_border),
-                                  onPressed: () {},
+                                  icon: Icon(
+                                    isLiked ? Icons.favorite : Icons.favorite_border,
+                                    color: isLiked ? Colors.red : Colors.grey,
+                                  ),
+                                  onPressed: () {
+                                    _handleLike(post);
+                                  },
                                 ),
                                 SizedBox(width: 5),
                                 Text(post.likeCount.toString()), // Replace with dynamic like count
@@ -180,7 +246,9 @@ class _FeedScreenState extends State<FeedScreen> {
                               children: [
                                 IconButton(
                                   icon: Icon(Icons.comment),
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    _showCommentDialog(post.id!);
+                                  },
                                 ),
                                 SizedBox(width: 5),
                                 Text(post.commentsCount.toString()), // Replace with dynamic comment count

@@ -1,0 +1,33 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class Comment {
+  String userId;
+  String username;
+  String content;
+  DateTime createdAt;
+
+  Comment({
+    required this.userId,
+    required this.username,
+    required this.content,
+    required this.createdAt,
+  });
+
+  factory Comment.fromMap(Map<String, dynamic> data) {
+    return Comment(
+      userId: data['userId'],
+      username: data['username'],
+      content: data['content'],
+      createdAt: (data['createdAt'] as Timestamp).toDate(),
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'userId': userId,
+      'username': username,
+      'content': content,
+      'createdAt': FieldValue.serverTimestamp(),
+    };
+  }
+}

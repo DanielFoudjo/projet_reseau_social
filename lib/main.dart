@@ -7,13 +7,14 @@ import 'screens/notifications_screen.dart';
 import 'screens/profile_screen.dart';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Ajout de Firebase Auth
 import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-await Firebase.initializeApp(
-  options: DefaultFirebaseOptions.currentPlatform,
-);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const SocialNetworkApp());
 }
 
@@ -45,7 +46,26 @@ class SocialNetworkApp extends StatelessWidget {
         '/search': (context) => SearchScreen(),
         '/create-post': (context) => CreatePostScreen(),
         '/notifications': (context) => NotificationsScreen(),
-        '/profile': (context) => ProfileScreen(),
+        '/profile': (context) {
+          // Récupération du userId de l'utilisateur connecté
+          final String? userId = FirebaseAuth.instance.currentUser?.uid;
+
+          if (userId == null) {
+            // Si aucun utilisateur connecté, affiche un message ou redirige
+            return Scaffold(
+              appBar: AppBar(title: const Text("Erreur")),
+              body: const Center(
+                child: Text(
+                  "Aucun utilisateur connecté. Veuillez vous connecter.",
+                  style: TextStyle(fontSize: 16, color: Colors.red),
+                ),
+              ),
+            );
+          }
+
+          // Si un utilisateur est connecté, charge la page du profil
+          return ProfileScreen(userId: userId);
+        },
       },
     );
   }
