@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart'; // Pour formater les dates et heures
+
+import '../models/user_model.dart';
+import '../utils/user.dart';
 
 class ChatScreen extends StatefulWidget {
   final String currentUser; // L'utilisateur actuel
@@ -20,6 +22,27 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  String profile = '';
+
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName(); // Charger les données utilisateur au démarrage
+  }
+
+
+  Future<void> _loadUserName() async { 
+    UserModel? userData = await GetUserDataFromFirestore.getOneUser(widget.chatWithUser); // Appel de la méthode dans user_service.dart
+      if (userData != null){
+      setState(() {
+        profile = userData.avatarUrl ?? '';
+        
+      });
+    }
+  }
+
+
 
   void sendMessage() {
     String messageContent = _messageController.text.trim();
@@ -45,7 +68,7 @@ class _ChatScreenState extends State<ChatScreen> {
         title: Row(
           children: [
             CircleAvatar(
-              backgroundImage: AssetImage('assets/avatar.png'), // Remplace par l'image de l'utilisateur
+              backgroundImage: NetworkImage(profile), // Remplace par l'image de l'utilisateur
               radius: 20,
             ),
             SizedBox(width: 10),
@@ -104,59 +127,14 @@ class _ChatScreenState extends State<ChatScreen> {
 
                 List<DocumentSnapshot> docs = snapshot.data!.docs;
 
-                // Regrouper les messages par date
-                Map<String, List<DocumentSnapshot>> groupedMessages = {};
-                for (var doc in docs) {
-                  String date = DateFormat('yyyy-MM-dd')
-                      .format((doc['timestamp'] as Timestamp).toDate());
-                  if (groupedMessages[date] == null) {
-                    groupedMessages[date] = [];
-                  }
-                  groupedMessages[date]!.add(doc);
-                }
-
                 return ListView.builder(
                   padding: EdgeInsets.all(10),
-                  itemCount: groupedMessages.keys.length,
+                  itemCount: docs.length,
                   itemBuilder: (context, index) {
-                    String date = groupedMessages.keys.toList()[index];
-                    List<DocumentSnapshot> messages = groupedMessages[date]!;
+                    final data = docs[index].data() as Map<String, dynamic>;
+                    bool isSentByMe = data['from'] == widget.currentUser;
 
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Afficher la date
-                        Center(
-                          child: Container(
-                            margin: EdgeInsets.symmetric(vertical: 10),
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade100,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              DateFormat('dd MMMM yyyy').format(
-                                  DateTime.parse(date)), // Formatage de la date
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ),
-                        // Afficher les messages de la date
-                        ...messages.map((doc) {
-                          Map<String, dynamic> data =
-                              doc.data() as Map<String, dynamic>;
-                          bool isSentByMe = data['from'] == widget.currentUser;
-                          return buildMessageBubble(
-                              data['contents'],
-                              isSentByMe,
-                              (data['timestamp'] as Timestamp).toDate());
-                        }).toList(),
-                      ],
-                    );
+                    return buildMessageBubble(data['contents'], isSentByMe);
                   },
                 );
               },
@@ -169,7 +147,7 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget buildMessageBubble(String message, bool isSentByMe, DateTime timestamp) {
+  Widget buildMessageBubble(String message, bool isSentByMe) {
     return Align(
       alignment: isSentByMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -192,25 +170,12 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              message,
-              style: TextStyle(
-                color: isSentByMe ? Colors.black : Colors.black87,
-                fontSize: 14,
-              ),
-            ),
-            SizedBox(height: 5),
-            Text(
-              DateFormat('HH:mm').format(timestamp), // Afficher l'heure
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 10,
-              ),
-            ),
-          ],
+        child: Text(
+          message,
+          style: TextStyle(
+            color: isSentByMe ? Colors.black : Colors.black87,
+            fontSize: 14,
+          ),
         ),
       ),
     );

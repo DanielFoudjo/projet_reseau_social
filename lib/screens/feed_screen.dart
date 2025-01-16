@@ -150,33 +150,33 @@ class _FeedScreenState extends State<FeedScreen> {
       body: Column(
         children: [
           // Top Avatars Section
-          Container(
-            height: 100,
-            color: Colors.white,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              itemCount: 10, // Replace with dynamic count
-              separatorBuilder: (context, index) => SizedBox(width: 10),
-              itemBuilder: (context, index) {
-                return Column(
-                  children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundImage: NetworkImage(
-                        "https://via.placeholder.com/150", // Replace with dynamic URL
-                      ),
-                    ),
-                    SizedBox(height: 5),
-                    Text(
-                      "User $index", // Replace with dynamic username
-                      style: TextStyle(fontSize: 12),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
+          // Container(
+          //   height: 100,
+          //   color: Colors.white,
+          //   child: ListView.separated(
+          //     scrollDirection: Axis.horizontal,
+          //     padding: EdgeInsets.symmetric(horizontal: 10),
+          //     itemCount: 10, // Replace with dynamic count
+          //     separatorBuilder: (context, index) => SizedBox(width: 10),
+          //     itemBuilder: (context, index) {
+          //       // return Column(
+          //       //   children: [
+          //       //     CircleAvatar(
+          //       //       radius: 30,
+          //       //       backgroundImage: NetworkImage(
+          //       //         "https://via.placeholder.com/150", // Replace with dynamic URL
+          //       //       ),
+          //       //     ),
+          //       //     SizedBox(height: 5),
+          //       //     Text(
+          //       //       "User $index", // Replace with dynamic username
+          //       //       style: TextStyle(fontSize: 12),
+          //       //     ),
+          //       //   ],
+          //       // );
+          //     },
+          //   ),
+          // ),
           SizedBox(height: 10),
           // Posts Feed
           Expanded(
@@ -205,10 +205,17 @@ class _FeedScreenState extends State<FeedScreen> {
                           post.ownerUsername, // Replace with dynamic username
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        subtitle: Text(post.createdAt.timeZoneOffset.toString() + "ago"), // Replace with dynamic timestamp
+                        subtitle: Text("posté le " + post.createdAt.toString()), // Replace with dynamic timestamp
                         trailing: Icon(Icons.more_vert),
                       ),
                       // Post Image
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                        child: Text(
+                          post.content ?? '', // Remplacez par le message du post
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                        ),
+                      ),
                       Container(
                         height: 200,
                         decoration: BoxDecoration(

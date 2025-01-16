@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; 
 import '../services/chat_service.dart';
 import '../screens/chat_screen.dart';
+import '../utils/navigation.dart';
 
 class HomeScreen extends StatefulWidget {
   final String currentUser;
@@ -62,25 +63,31 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemCount: filteredUsers.length,
                   itemBuilder: (context, index) {
                     final user = filteredUsers[index];
-                    return ListTile(
-                      title: Text(user['username']),
-                      subtitle: Text(user['email']),
-                      onTap: () {
-                        final chatRoomId = _chatService.generateChatRoomId(
-                          widget.currentUser,
-                          user['username'],
-                        );
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ChatScreen(
-                              currentUser: widget.currentUser,
-                              chatWithUser: user['username'],
-                              chatRoomId: chatRoomId,
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 15.0), // Ajout d'espacement vertical
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: NetworkImage(user['avatarUrl'] ?? ''), // URL de la photo
+                          radius: 24,
+                        ),
+                        title: Text(user['username'] ?? 'Utilisateur inconnu'),
+                        onTap: () {
+                          final chatRoomId = _chatService.generateChatRoomId(
+                            widget.currentUser,
+                            user['username'],
+                          );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ChatScreen(
+                                currentUser: widget.currentUser,
+                                chatWithUser: user['username'],
+                                chatRoomId: chatRoomId,
+                              ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     );
                   },
                 );
@@ -89,6 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+      bottomNavigationBar: Navigation(),
     );
   }
 }
